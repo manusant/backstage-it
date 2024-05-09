@@ -114,7 +114,7 @@ import {BackstageIt} from "backstage-it";
 beforeAll(async () => {
     await BackstageIt.setUp({
         ...
-        afterSetup: async ({address}) => {
+        afterSetup: async ({address, logger}) => {
             // Additional setup logic after the server is started
             logger.info(`Test Server running at ${address}`);
             // Pre-configure PactumJs: Sets the server address for Pactum framework
