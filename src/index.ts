@@ -1,6 +1,6 @@
 import * as winston from "winston";
 import {DatabaseManager} from "@backstage/backend-common";
-import {ConfigReader} from "@backstage/config";
+import {Config, ConfigReader} from "@backstage/config";
 import {Server} from "http";
 import {TestServerConfig} from "./types";
 
@@ -45,7 +45,7 @@ export class BackstageIt {
      * sets up the database connection, starts the server, and provides a utility method for accessing the server address.
      *
      * */
-    static async setUp(config: TestServerConfig) {
+    static async setUp(setUpConfig: TestServerConfig) {
         /**
          * Logs must be in the JSON format, independently of the development language and framework of your application.
          * This helps Datadog to easily understand and extract information from your easily. Another big advantage of JSON logs
@@ -54,13 +54,16 @@ export class BackstageIt {
          *
          * */
         const logger = BackstageIt.createLogger({
-            service: config.appName,
-            platform: config.platformName,
-            logLevel: config.logLevel
+            service: setUpConfig.appName,
+            platform: setUpConfig.platformName,
+            logLevel: setUpConfig.logLevel
         });
 
-        if (config.database) {
-            const {database} = await BackstageIt.createStore(config.database);
+        if (setUpConfig.database) {
+            const {database} = await BackstageIt.createStore({
+                ...setUpConfig.database,
+                config: setUpConfig.config
+            });
             BackstageIt.database = database;
         }
 
@@ -68,15 +71,16 @@ export class BackstageIt {
             ? Number(process.env.BACKSTAGE_IT_PORT)
             : 0;
 
-        BackstageIt.server = await config.server({
+        BackstageIt.server = await setUpConfig.server({
             port,
             logger,
             enableCors: false,
-            optionalDatabase: config.database ? BackstageIt.database : undefined
+            optionalConfig: setUpConfig.config,
+            optionalDatabase: setUpConfig.database ? BackstageIt.database : undefined
         });
 
-        if (config.afterSetup) {
-            await config.afterSetup({
+        if (setUpConfig.afterSetup) {
+            await setUpConfig.afterSetup({
                 logger,
                 port: BackstageIt.serverPort(),
                 address: BackstageIt.serverAddress(),
@@ -132,17 +136,22 @@ export class BackstageIt {
     /**
      * The createStore method is responsible for creating a database connection using the DatabaseManager class and running the latest database migrations.
      * */
-    static async createStore({databaseName, migrationsDir}: { databaseName: string, migrationsDir: string, }) {
-        const database = await DatabaseManager.fromConfig(
-            new ConfigReader({
-                backend: {
-                    database: {
-                        client: 'better-sqlite3',
-                        connection: ':memory:',
-                    },
+    static async createStore({databaseName, migrationsDir, config}: {
+        databaseName: string,
+        migrationsDir: string,
+        config?: Config
+    }) {
+        const databaseConfig = config ? config.get<{}>("backend.database") : {
+            backend: {
+                database: {
+                    client: 'better-sqlite3',
+                    connection: ':memory:',
                 },
-            }),
-        ).forPlugin(databaseName)
+            },
+        };
+
+        const database = await DatabaseManager.fromConfig(new ConfigReader(databaseConfig))
+            .forPlugin(databaseName)
             .getClient();
 
         await database.migrate.latest({

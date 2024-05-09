@@ -1,6 +1,6 @@
 {
   "name": "backstage-it",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Integration tests Setup for Backstage backend services",
   "author": "Manuel Santos <ney.br.santos@gmail.com>",
   "license": "MIT",

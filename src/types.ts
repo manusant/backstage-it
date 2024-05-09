@@ -6,6 +6,7 @@ import {Config} from "@backstage/config";
 export type TestServerConfig = {
   appName: string;
   platformName: string;
+  config?: Config;
   logLevel?: string;
   database?: { databaseName: string, migrationsDir: string, };
   server: Types,
