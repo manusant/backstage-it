@@ -151,3 +151,40 @@ object with the following properties:
 `BackstageIt.serverAddress(): string` Returns the address of the server.
 
 `BackstageIt.serverPort(): number` Returns the port number of the server.
+
+## The Server
+The integration tests should be able to run the same start server script that your application uses in order to keep things paired
+and make sure tests are bootstrapping the real application.
+
+Something similar to the following:
+```typescript
+export async function startServer(options: ServerOptions): Promise<Server> {
+    const logger = options.logger.child({plugin: PLUGIN_ID});
+
+    logger.info('Loading configurations ...');
+    const config = options.optionalConfig ?? await loadBackendConfig({
+        argv: process.argv,
+        logger,
+    });
+
+    const environment = await createEnv(config, logger, options.optionalDatabase);
+
+    logger.info('Registering API...');
+    const router = await createRouter(environment);
+
+    const service = createServiceBuilder(module)
+        .enableCors({origin: '*'})
+        .setRequestLoggingHandler(createRequestLogger)
+        .addRouter('', await createHealthRouter())
+        .addRouter('/my-api', router);
+
+    logger.info('Starting Server...');
+    return service
+        .setPort(options.port)
+        .start()
+        .catch(err => {
+            logger.error(err);
+            process.exit(1);
+        });
+}
+```
