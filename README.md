@@ -15,11 +15,11 @@ npm install backstage-it --save-dev
 ## Usage
 To use BackstageIt with [Jest](https://jestjs.io/) for testing your backend application, follow these steps to configure Jest:
 
-1. Install Jest: If you haven't already installed Jest, you can do so using npm:
+1. **Install Jest**: If you haven't already installed Jest, you can do so using npm:
 ```bash
 npm install jest --save-dev
 ```
-2. Create Jest Configuration: Create a Jest configuration file (e.g., `jest.config.js`) in the root of your project with the following content:
+2. **Create Jest Configuration**: Create a Jest configuration file (e.g., `jest.config.js`) in the root of your project with the following content:
 ```javascript 
 // jest.config.js
 module.exports = {
