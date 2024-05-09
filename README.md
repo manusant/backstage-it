@@ -71,7 +71,7 @@ and the Teardown script:
 import {BackstageIt} from "backstage-it";
 
 afterAll(async () => {
-    BackstageIt.server.close();
+    await BackstageIt.destroy();
 });
 ```
 4. **Write Integration Tests**: Write integration tests using [Jest](https://jestjs.io/) to test your backend application. For example: 
