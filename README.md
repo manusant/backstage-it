@@ -58,7 +58,7 @@ beforeAll(async () => {
             // For example: instantiate services that your server needs other than the defaults coming within options
             return await startServer(options);
         },
-        afterSetup: async ({address}) => {
+        afterSetup: async ({address, logger}) => {
             // Additional setup logic after the server is started
             logger.info(`Test Server running at ${address}`);
         }
