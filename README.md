@@ -134,6 +134,24 @@ const response = await spec()
 ...
 ```
 
+## Database Only
+If you want to test the persistence layer only, there is no need to start the serve, in such case, you can skip the start server configuration.
+
+```
+await BackstageIt.setUp({
+    appName: 'academy-server',
+    platformName: 'backstage',
+    logLevel: 'debug',
+    database: {
+      databaseName: 'academy',
+      migrationsDir: resolvePackagePath(
+        '@mercedes-benz/academy-server',
+        'migrations',
+      ),
+    }
+  });
+```
+
 ## API
 `BackstageIt.setUp(config: TestServerConfig)` Initializes the server and database for the application. Accepts a configuration 
 object with the following properties:

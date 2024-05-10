@@ -2,7 +2,7 @@ import * as winston from "winston";
 import {DatabaseManager} from "@backstage/backend-common";
 import {Config, ConfigReader} from "@backstage/config";
 import {Server} from "http";
-import {TestServerConfig} from "./types";
+import {TestServerConfig} from "./serverFactory";
 
 /**
  * Class responsible for initializing the server and database for the application. It creates a logger,
@@ -46,18 +46,6 @@ export class BackstageIt {
      *
      * */
     static async setUp(setUpConfig: TestServerConfig) {
-        /**
-         * Logs must be in the JSON format, independently of the development language and framework of your application.
-         * This helps Datadog to easily understand and extract information from your easily. Another big advantage of JSON logs
-         * is that multi-line log messages (for example: stack traces) will appear in Datadog as a single line entry, making it easy
-         * to read and search for the message.
-         *
-         * */
-        const logger = BackstageIt.createLogger({
-            service: setUpConfig.appName,
-            platform: setUpConfig.platformName,
-            logLevel: setUpConfig.logLevel
-        });
 
         if (setUpConfig.database) {
             const {database} = await BackstageIt.createStore({
@@ -67,26 +55,41 @@ export class BackstageIt {
             BackstageIt.database = database;
         }
 
-        const port = process.env.BACKSTAGE_IT_PORT
-            ? Number(process.env.BACKSTAGE_IT_PORT)
-            : 0;
-
-        BackstageIt.server = await setUpConfig.server({
-            port,
-            logger,
-            enableCors: false,
-            optionalConfig: setUpConfig.config,
-            optionalDatabase: setUpConfig.database ? BackstageIt.database : undefined
-        });
-
-        if (setUpConfig.afterSetup) {
-            await setUpConfig.afterSetup({
-                logger,
-                port: BackstageIt.serverPort(),
-                address: BackstageIt.serverAddress(),
-                server: BackstageIt.server,
-                database: BackstageIt.database
+        if (setUpConfig.server) {
+            /**
+             * Logs must be in the JSON format, independently of the development language and framework of your application.
+             * This helps Datadog to easily understand and extract information from your easily. Another big advantage of JSON logs
+             * is that multi-line log messages (for example: stack traces) will appear in Datadog as a single line entry, making it easy
+             * to read and search for the message.
+             *
+             * */
+            const logger = BackstageIt.createLogger({
+                service: setUpConfig.appName,
+                platform: setUpConfig.platformName,
+                logLevel: setUpConfig.logLevel
             });
+
+            const port = process.env.BACKSTAGE_IT_PORT
+                ? Number(process.env.BACKSTAGE_IT_PORT)
+                : 0;
+
+            BackstageIt.server = await setUpConfig.server({
+                port,
+                logger,
+                enableCors: false,
+                optionalConfig: setUpConfig.config,
+                optionalDatabase: setUpConfig.database ? BackstageIt.database : undefined
+            });
+
+            if (setUpConfig.afterSetup) {
+                await setUpConfig.afterSetup({
+                    logger,
+                    port: BackstageIt.serverPort(),
+                    address: BackstageIt.serverAddress(),
+                    server: BackstageIt.server,
+                    database: BackstageIt.database
+                });
+            }
         }
     }
 

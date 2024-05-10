@@ -9,7 +9,7 @@ export type TestServerConfig = {
   config?: Config;
   logLevel?: string;
   database?: { databaseName: string, migrationsDir: string, };
-  server: Types,
+  server?: ServerFactory,
   afterSetup?: AfterSetupFactory
 }
 
@@ -29,6 +29,6 @@ export type ServerContext = {
   database?: Knex;
 }
 
-export type Types = (options: ServerOptions) => Promise<Server>;
+export type ServerFactory = (options: ServerOptions) => Promise<Server>;
 
 export type AfterSetupFactory = (context: ServerContext) => Promise<void>;
