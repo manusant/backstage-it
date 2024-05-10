@@ -97,12 +97,15 @@ export class BackstageIt {
      * The destroy method is responsible for shutting down the server and destroying the database connection.
      * */
     static async destroy() {
-        await (new Promise<void>((resolve) => {
-            BackstageIt.server.close(() => {
-                // Once the server is closed, resolve the Promise
-                resolve();
-            });
-        }));
+
+        if (BackstageIt.server){
+            await (new Promise<void>((resolve) => {
+                BackstageIt.server.close(() => {
+                    // Once the server is closed, resolve the Promise
+                    resolve();
+                });
+            }));
+        }
 
         // Check if the database exists before attempting to destroy it
         if (BackstageIt.database) {
