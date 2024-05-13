@@ -100,7 +100,7 @@ export class BackstageIt {
 
         if (BackstageIt.server){
             await (new Promise<void>((resolve) => {
-                BackstageIt.server.close(() => {
+                BackstageIt.server?.close(() => {
                     // Once the server is closed, resolve the Promise
                     resolve();
                 });
@@ -109,7 +109,7 @@ export class BackstageIt {
 
         // Check if the database exists before attempting to destroy it
         if (BackstageIt.database) {
-            await BackstageIt.database.destroy();
+            await BackstageIt.database?.destroy();
         }
     }
 
