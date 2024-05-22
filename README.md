@@ -137,7 +137,7 @@ const response = await spec()
 ## Database Only
 If you want to test the persistence layer only, there is no need to start the serve, in such case, you can skip the start server configuration.
 
-```
+```typescript
 await BackstageIt.setUp({
     appName: 'academy-server',
     platformName: 'backstage',
